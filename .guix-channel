@@ -1,0 +1,5 @@
+;; Channel metadata (format: guix/channels.scm, read-channel-metadata).
+;; Modules live at the repo root, so no (directory ...) field: the repo
+;; works both as a channel and as a plain -L load path.
+(channel
+ (version 0))
