@@ -25,7 +25,15 @@
            ;; Prebuilt static pure-Go binary: nothing to strip or validate,
            ;; and strip can damage Go buildinfo.
            #:validate-runpath? #f
-           #:strip-binaries? #f))
+           #:strip-binaries? #f
+           #:phases
+           #~(modify-phases %standard-phases
+               ;; The tarball is flat except for a doc/ subdirectory; the
+               ;; default unpack chdirs into the first subdirectory it finds,
+               ;; hiding the top-level `cue' binary from the install plan.
+               (replace 'unpack
+                 (lambda* (#:key source #:allow-other-keys)
+                   (invoke "tar" "xzf" source))))))
     (supported-systems '("x86_64-linux"))
     (home-page "https://cuelang.org")
     (synopsis "CUE language CLI (official release binary)")
