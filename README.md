@@ -6,9 +6,15 @@ projects. Modules live at the repo root under `infrashift/`, e.g.
 
 ## Packages
 
-- **cue** — CUE language CLI (`cuelang.org`), wrapping the official upstream
-  release binary pinned by version + sha256. (A source-built go-build-system
-  package may replace it later.)
+All wrap official upstream release binaries pinned by version + sha256
+(source-built go-build-system packages may replace them later):
+
+- **cue** — CUE language CLI (`cuelang.org`)
+- **grype** — Anchore vulnerability scanner
+- **syft** — Anchore SBOM generator
+- **cosign** — Sigstore artifact signing/verification
+- **fulcio** — Sigstore code-signing certificate authority (server)
+- **rekor-cli** / **rekor-server** — Sigstore transparency log client/server
 
 ## Usage
 
