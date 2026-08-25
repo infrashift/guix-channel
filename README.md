@@ -55,9 +55,9 @@ makes `guix` verify the OpenPGP signature on every commit it fetches:
        (branch "main")
        (introduction
         (make-channel-introduction
-         "ce2008bda555bd769c4488b8e39541a4c555fbf9"
+         "a39c017e96894924a461163ab42cca4645d1ef5a"
          (openpgp-fingerprint
-          "7652 899D 3FBF 73B4 6EDA  00BB 0755 1D03 3C04 AAD4"))))
+          "DA12 410C ACFB 0E1D 46C0  944A 9CE0 4DC9 D65C A7EF"))))
       %default-channels)
 ```
 
@@ -72,10 +72,14 @@ from a host somebody else could come to control, so none of it can be its own
 root of trust. The introduction is the part an attacker who owned this
 repository still could not change, because it lives in *your* configuration.
 
-From `ce2008b` onward, guix refuses any commit not signed by a key that
+The fingerprint is the **signing subkey's**, not the primary's — guix compares
+whatever key actually made the signature, and this primary is certify-only and
+cannot sign at all.
+
+From `a39c017` onward, guix refuses any commit not signed by a key that
 `.guix-authorizations` authorised **in the parent commit**. So a new committer
 can only be added by an existing one, and the history of who could sign what is
-itself part of the authenticated chain. Commits *before* `ce2008b` are not
+itself part of the authenticated chain. Commits *before* `a39c017` are not
 authenticated and cannot be — authentication has to start somewhere a human
 chose deliberately.
 
@@ -86,7 +90,7 @@ Verify the pin against this repository before trusting it:
 
 ```sh
 git clone https://github.com/infrashift/guix-channel && cd guix-channel
-git verify-commit ce2008bda555bd769c4488b8e39541a4c555fbf9
+git verify-commit a39c017e96894924a461163ab42cca4645d1ef5a
 ```
 
 ### As a load path (package development only)
