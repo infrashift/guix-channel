@@ -43,33 +43,70 @@ already carry `go`, `node`, `python`, `python-pytest`, `uv`, `govulncheck` and
 
 ## Usage
 
-### As a load path (local builds, no channel machinery)
+### As a channel (recommended)
 
-Point any `guix` command at a checkout of this repo with `-L`:
-
-```sh
-guix build -L /path/to/guix-channel cue
-guix system image -L /path/to/guix-channel my-config.scm
-```
-
-This is how `labs/guix/image/build.sh devspace` in the
-`infrashift/libvirt-qemu-kvm` repo consumes it (the repo is bind-mounted at
-`/channel` inside the image-builder container).
-
-### As a channel (guix pull)
-
-Add to `~/.config/guix/channels.scm`:
+Add to `~/.config/guix/channels.scm`. **Include the introduction** — it is what
+makes `guix` verify the OpenPGP signature on every commit it fetches:
 
 ```scheme
 (cons (channel
        (name 'infrashift)
        (url "https://github.com/infrashift/guix-channel")
-       (branch "main"))
+       (branch "main")
+       (introduction
+        (make-channel-introduction
+         "ce2008bda555bd769c4488b8e39541a4c555fbf9"
+         (openpgp-fingerprint
+          "7652 899D 3FBF 73B4 6EDA  00BB 0755 1D03 3C04 AAD4"))))
       %default-channels)
 ```
 
-Until a channel introduction (signing) is set up, `guix pull` requires
-`--allow-untrusted-channels`.
+`--allow-untrusted-channels` is no longer needed, and should not be used: it
+would switch off the check this introduction exists to perform.
+
+#### What the introduction actually does
+
+It pins **one commit** and **one fingerprint**, out of band. Everything else in
+this repository — including `.guix-authorizations` — is fetched over the network
+from a host somebody else could come to control, so none of it can be its own
+root of trust. The introduction is the part an attacker who owned this
+repository still could not change, because it lives in *your* configuration.
+
+From `ce2008b` onward, guix refuses any commit not signed by a key that
+`.guix-authorizations` authorised **in the parent commit**. So a new committer
+can only be added by an existing one, and the history of who could sign what is
+itself part of the authenticated chain. Commits *before* `ce2008b` are not
+authenticated and cannot be — authentication has to start somewhere a human
+chose deliberately.
+
+The public keys live on the [`keyring`](../../tree/keyring) branch, which is
+where guix looks by default.
+
+Verify the pin against this repository before trusting it:
+
+```sh
+git clone https://github.com/infrashift/guix-channel && cd guix-channel
+git verify-commit ce2008bda555bd769c4488b8e39541a4c555fbf9
+```
+
+### As a load path (package development only)
+
+Point any `guix` command at a checkout with `-L`:
+
+```sh
+guix build -L /path/to/guix-channel cue
+```
+
+This bypasses the channel machinery entirely: no commit, no signature, no
+authentication. It is for iterating on a package definition, and an artifact
+built this way has provenance that does not describe it. `infrashift/libvirt-qemu-kvm`
+exposes it as `CHANNEL_DEV=1` and warns on every build that uses it.
+
+## Licence
+
+Apache 2.0 — see [LICENSE](LICENSE). That covers the **package definitions** in
+this repository. The software each one builds carries its own licence, declared
+in the package record itself.
 
 ## Vendored source builds
 
