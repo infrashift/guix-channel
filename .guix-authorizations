@@ -1,0 +1,25 @@
+;; Who may commit to this channel.
+;;
+;; `guix pull' and `guix time-machine' authenticate every commit they fetch
+;; against this file AS IT STOOD IN THE PARENT COMMIT -- so a key can only ever
+;; be added by somebody this file already authorises, and an attacker who can
+;; write to the repository still cannot make a commit that guix will accept.
+;;
+;; THE FINGERPRINT IS THE PRIMARY KEY'S, not the signing subkey's, even though
+;; the subkey is what signs. Guix resolves a signature back to the primary key
+;; that certifies it and compares THAT. Listing a subkey fingerprint here
+;; produces a file that parses, a commit that is properly signed, and an
+;; authentication failure that names neither.
+;;
+;; The matching public key lives on the `keyring' branch of this repository,
+;; which is where guix looks for it -- adding a fingerprint here without adding
+;; the key there authorises somebody guix cannot identify.
+;;
+;; A consumer only trusts any of this because of the channel INTRODUCTION, which
+;; pins a fingerprint and a commit out of band. See README.md.
+
+(authorizations
+ (version 0)
+
+ (("7652 899D 3FBF 73B4 6EDA  00BB 0755 1D03 3C04 AAD4"
+   (name "ryancraig"))))
