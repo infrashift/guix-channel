@@ -5,11 +5,26 @@
 ;; be added by somebody this file already authorises, and an attacker who can
 ;; write to the repository still cannot make a commit that guix will accept.
 ;;
-;; THE FINGERPRINT IS THE PRIMARY KEY'S, not the signing subkey's, even though
-;; the subkey is what signs. Guix resolves a signature back to the primary key
-;; that certifies it and compares THAT. Listing a subkey fingerprint here
-;; produces a file that parses, a commit that is properly signed, and an
-;; authentication failure that names neither.
+;; THE FINGERPRINT IS THE SIGNING SUBKEY'S, not the primary's, and that is the
+;; opposite of what it looks like it should be. guix does NOT resolve a
+;; signature back to the certifying primary key: `authenticate-commit' compares
+;; (openpgp-public-key-fingerprint (commit-signing-key ...)) -- the fingerprint
+;; of whatever key actually made the signature -- against this list. The
+;; introduction in the consumer's channels.scm is checked by the same function
+;; and therefore takes the same fingerprint.
+;;
+;; It could not be the primary here in any case: that key is certify-only and
+;; cannot sign, so gpg always reaches for this subkey.
+;;
+;; CONSEQUENCE FOR ROTATION: replacing the signing subkey means editing this
+;; file, in a commit signed by the OUTGOING subkey, before the new one can sign
+;; anything. The primary's fingerprint never appears here, so renewing or
+;; re-certifying the primary does not touch it.
+;;
+;; Verified the hard way: an earlier version of this file named the primary,
+;; every commit was properly signed, the file parsed, and `guix time-machine'
+;; refused the channel with
+;;   initial commit ... is signed by 'DA12 ...' instead of '7652 ...'
 ;;
 ;; The matching public key lives on the `keyring' branch of this repository,
 ;; which is where guix looks for it -- adding a fingerprint here without adding
@@ -21,5 +36,5 @@
 (authorizations
  (version 0)
 
- (("7652 899D 3FBF 73B4 6EDA  00BB 0755 1D03 3C04 AAD4"
+ (("DA12 410C ACFB 0E1D 46C0  944A 9CE0 4DC9 D65C A7EF"
    (name "ryancraig"))))
