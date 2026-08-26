@@ -24,13 +24,21 @@ Unless noted, these wrap official upstream release binaries pinned by version
 - **gocyclo** — cyclomatic complexity reporter for Go. **Built from source**
   (`go-build-system`): upstream publishes no release assets. Its `go.mod` has
   zero dependencies, so the build needs no inputs.
-- **kaniko** — builds container images from a Dockerfile without a Docker
-  daemon (the `osscontainertools` fork that succeeded the archived
-  `GoogleContainerTools/kaniko`). **Built from source**; upstream publishes no
-  release assets but does commit a `vendor/` tree, which is exactly how
-  `go-build-system`'s GOPATH mode resolves imports, so the build needs no
-  inputs. Installs `kaniko-executor` and `kaniko-warmer`, renamed from
-  upstream's far-too-generic `executor` and `warmer`.
+- **kaniko-executor** / **kaniko-warmer** — builds container images from a
+  Dockerfile without a Docker daemon (the `osscontainertools` fork that
+  succeeded the archived `GoogleContainerTools/kaniko`). **Built from source**;
+  upstream publishes no release assets but does commit a `vendor/` tree, which
+  is exactly how `go-build-system`'s GOPATH mode resolves imports, so the build
+  needs no inputs. Each installs one binary, renamed from upstream's
+  far-too-generic `executor` and `warmer`.
+
+  **Two packages, because the two commands have opposite requirements.**
+  `kaniko-warmer` fetches base images from a registry and cannot work without a
+  network; `kaniko-executor` runs inside a hermetic build that must not have
+  one. One package would put both in every closure that wants either, so the
+  image that must not reach a registry would ship the tool for reaching one.
+  They share a single source origin, so both resolve to the same fixed-output
+  store path and one `guix download --commit=…` seeds both.
 - **envbuilder** — builds a development environment from a `devcontainer.json`
   or Dockerfile, embedding kaniko as a library. **Built from source**, but
   unlike kaniko it commits no `vendor/` tree and pulls ~700 modules, so its
